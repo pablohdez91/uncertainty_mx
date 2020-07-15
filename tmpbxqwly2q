@@ -1,19 +1,14 @@
 # Modulos
 from selenium import webdriver
-#from selenium.webdriver.common.by import By
-#from selenium.webdriver.support.ui import WebDriverWait
-#from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import requests
 import time
 from math import ceil
 import sqlite3
 
-
-
 # definicion de funciones SQLite
 def create_table():
-    c.execute("CREATE TABLE IF NOT EXISTS Mural(fecha TEXT, titulo TEXT, articulo TEXT)")
+    c.execute("CREATE TABLE IF NOT EXISTS Reforma(fecha TEXT, titulo TEXT, articulo TEXT)")
 
 def insert_data():
     for i in range(len(links)):
@@ -21,61 +16,66 @@ def insert_data():
         t = titulos[i]
         a = articulos[i]
         
-        c.execute("INSERT INTO Mural(fecha, titulo, articulo) VALUES(?, ?, ?)", (f, t, a))
+        c.execute("INSERT INTO Reforma(fecha, titulo, articulo) VALUES(?, ?, ?)", 
+                  (f, t, a))
         conn.commit()
 
-
-
+"""
 import os
-path = "D:\Tesis\Webscraping"
+path = ""
 os.chdir(path)
+"""
 
 
+# Importante Revisar parámetros de búsqueda antes de ejecutar
+busqueda = "economia incertidumbre"
+fecha_ini = '01-01-2020'    # formato: dd-mm-yyyy
+fecha_fin = '31-03-2020'    # formato: dd-mm-yyyy
 
-# abre conección a la base
-conn = sqlite3.connect('noticias.db')
-c = conn.cursor()
-create_table()
+periodico = 'reforma' # 'reforma', 'mural' o 'elnorte'
+
+
 
 # Inicio
-url = 'https://busquedas.gruporeforma.com/mural/BusquedasComs.aspx'
-base = 'https://busquedas.gruporeforma.com/mural/'
+url = 'https://busquedas.gruporeforma.com/{}/BusquedasComs.aspx'.format(periodico)
+base = 'https://busquedas.gruporeforma.com/{}/'.format(periodico)
 chrome = "C:\\Users\\Pablo\\chromedriver.exe"
 
-# parametros de búsqueda
-busqueda = "economia incertidumbre"
-fecha_ini = '01-01-1990'
-fecha_fin = '31-12-2019'
-
-# inicia navegacion
-driver = webdriver.Chrome()
+driver = webdriver.Chrome(chrome)
 driver.get(url)
+
 
 # Introduce parámetros de búsqueda:
 driver.find_element_by_name('txtTextSearch').send_keys(busqueda)
 driver.find_element_by_name('txtFechaIni').send_keys(fecha_ini)
 driver.find_element_by_name('txtFechaFin').send_keys(fecha_fin)
-driver.find_element_by_id('rb_orden_2').click() # con este ya hace la busqueda
+driver.find_element_by_id('rb_orden_2').click() 
 
-#### Meter wait explicito para que cargue la página
-time.sleep(5)   #! Idealmente debería ser implicito
+#### Wait para que cargue la página
+time.sleep(5)
 
-
-#### Definimos parámetros del ciclo
+#### Definimos el numero total de paginas
 soup = BeautifulSoup(driver.page_source, 'html.parser')
 P = soup.find('span', class_='totalRegistros').text
 P = P.replace(",", "")
 P = int(P)
-P = ceil(P/20)  #20 es el número de articulos por página
-pag = 1
+P = ceil(P/20)  # 20 es el número de articulos por página
 del soup
+
+
+# abre conección a la base
+conn = sqlite3.connect('noticias_test.db')
+c = conn.cursor()
+create_table()
+
 
 t_inicial = time.time()
 ### Comenzamos a iterar
+pag = 1
 while pag <= P:
     ### parsea la página
     soup = BeautifulSoup(driver.page_source, 'html.parser')
-        
+    
     ### recoge fechas
     soup_fechas = soup.find_all('p', class_='fecha')
     fechas = []
@@ -94,35 +94,30 @@ while pag <= P:
         links.append(soup_titulos[i]['href'])
     
     ### recoge los contenidos de las noticias por link
-        articulos = []
+    articulos = []
     for l in range(len(links)):
         r = requests.get(base+links[l])
         soup_texto = BeautifulSoup(r.text, 'html.parser')
-        if str(type(soup_texto.find('div', class_='Scroll'))) == "<class 'NoneType'>":
-            articulos.append("")
-        else:
-            art = str(soup_texto.find('div', class_='Scroll').find_all('div', class_='texto'))
-            articulos.append(art)   
+        art = str(soup_texto.find('div', class_='Scroll').find_all('div', class_='texto'))
+        articulos.append(art)    
 
-    
     #### Agrega las cosas a la base
     insert_data()
     
-    
-    #### Cambia la hoja
-    pag = pag + 1
+    #### Cambia la pagina
+    pag += 1
     if pag <= P:
         driver.find_element_by_id('a_pagina_' + str(pag)).click()
         t_avance = time.time()
-        print('pasamos a pagina ' + str(pag) + " ... " + str(t_avance-t_inicial)+' Segundos')
-        time.sleep(5) # espera que cargue la página. 
-    # idealmente este wait debería ser implicito
+        print('Progreso: pagina ' + str(pag) + " ... " + str(t_avance-t_inicial)+' Segundos')
+        time.sleep(5) # Espera para evitar bloqueos de IP 
+### Fin de la Iteración
 
+driver.quit()
 
 ### Cierra conección a la base
 c.close
 conn.close()
 
 
-print('.................... Done!')
-
+print('.................. Done!')

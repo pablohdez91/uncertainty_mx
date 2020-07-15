@@ -6,7 +6,6 @@ desde las noticias en bruto hasta la generación de conteos raw
 import pandas as pd
 import sqlite3
 import spacy
-# import time
 nlp = spacy.load('es_core_news_sm')
 
 

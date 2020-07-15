@@ -1,14 +1,15 @@
 # Modulos
 from selenium import webdriver
 from bs4 import BeautifulSoup
-# import requests
 import time
 from math import ceil
 import sqlite3
 
-# definicion de funciones SQLite
+
+# Definicion de funciones SQLite
+Periodico = 'Reforma'    # Reforma, Mural o Elnorte
 def create_table():
-    c.execute("CREATE TABLE IF NOT EXISTS Elnorte(fecha TEXT, titulo TEXT, articulo TEXT)")
+    c.execute("CREATE TABLE IF NOT EXISTS {}(fecha TEXT, titulo TEXT, articulo TEXT)".format(Periodico))
 
 def insert_data():
     for i in range(len(links)):
@@ -16,111 +17,111 @@ def insert_data():
         t = titulos[i]
         a = articulos[i]
         
-        c.execute("INSERT INTO Elnorte(fecha, titulo, articulo) VALUES(?, ?, ?)", 
+        c.execute("INSERT INTO {}(fecha, titulo, articulo) VALUES(?, ?, ?)".format(Periodico), 
                   (f, t, a))
         conn.commit()
 
-# Directorios
+
+
 import os
-path = "C:/Users/Pablo/Documents/MAESTRIA/TESIS/programas"
+path = "C:/Users/Pablo/Documents/MAESTRIA/TESIS/uncertainty_mx"
 os.chdir(path)
 
 
-# Inicio
-url = 'https://busquedas.gruporeforma.com/elnorte/BusquedasComs.aspx'
-base = 'https://busquedas.gruporeforma.com/elnorte/'
-chrome = "C:\\Users\\Pablo\\chromedriver.exe"
-
 # parametros de búsqueda
 busqueda = "economia incertidumbre"
-fecha_ini = '01-05-2020'
-fecha_fin = '31-05-2020'
+fecha_ini = '01-06-2020'
+fecha_fin = '30-06-2020'
+
+
+# Inicio
+url = 'https://busquedas.gruporeforma.com/{}/BusquedasComs.aspx'.format(Periodico)
+base = 'https://busquedas.gruporeforma.com/{}/'.format(Periodico)
+chrome = "C:\\Users\\Pablo\\chromedriver.exe"
+noticias = 'test.db'
 
 
 # inicia navegacion ---------------------------------------------------------
-driver = webdriver.Chrome()
-driver.get('https://elnorte.com')
+driver_art = webdriver.Chrome()
+driver_art.get('https://{}.com'.format(Periodico)) # Insertar Usuario y contraseña
 
-##### Aqui se introduce usuario y contraseña manualmente antes de seguir #####
+driver = webdriver.Chrome()
 driver.get(url)
+
 
 # Introduce parámetros de búsqueda:
 driver.find_element_by_name('txtTextSearch').send_keys(busqueda)
 driver.find_element_by_name('txtFechaIni').send_keys(fecha_ini)
 driver.find_element_by_name('txtFechaFin').send_keys(fecha_fin)
-driver.find_element_by_id('rb_orden_2').click() # con este ya hace la busqueda
+driver.find_element_by_id('rb_orden_2').click()
 
 #### Wait para que cargue la página
 time.sleep(5)
 
-#### Definimos parámetros del ciclo
+#### Numero de paginas
 soup = BeautifulSoup(driver.page_source, 'html.parser')
 P = soup.find('span', class_='totalRegistros').text
 P = P.replace(",", "")
 P = int(P)
 P = ceil(P/20)  #20 es el número de articulos por página
-pag = 1
-#P = 5
 del soup
 
-t_inicial = time.time()
-### Primera iteración
 
-fechas = []; titulos = []; links = []
+# Abre conección a la base
+conn = sqlite3.connect(noticias)
+c = conn.cursor()
+create_table()
+
+
+t_inicial = time.time()
+pag = 1
 while pag <= P:
     ### parsea la página
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     
     ### recoge fechas
     soup_fechas = soup.find_all('p', class_='fecha')
+    fechas = []
     for i in range(len(soup_fechas)):
         fechas.append(soup_fechas[i].text)
     
     ### recoge titulos
     soup_titulos = soup.find_all('a', class_='hoverC')
-    
+    titulos = []
     for i in range(len(soup_titulos)):
         titulos.append(soup_titulos[i].text)
         
     ### recoge links a las notas
+    links = []
     for i in range(len(soup_titulos)):
         links.append(soup_titulos[i]['href'])
+        
+    ### recoge los artículos completos
+    articulos = []
+    for l in range(len(links)):
+        driver_art.get(base+links[l])
+        soup_texto = BeautifulSoup(driver_art.page_source, 'html.parser')
+        art = str(soup_texto.find('div', class_='Scroll').find_all('div', class_='texto'))
+        articulos.append(art) 
+        time.sleep(5)    
     
+    insert_data()
+
     #### Cambia la hoja
-    pag = pag + 1
+    pag += 1
     if pag <= P:
         driver.find_element_by_id('a_pagina_' + str(pag)).click()
-        #t_avance = time.time()
-        #print('pasamos a pagina ' + str(pag) + " ... " + str(t_avance-t_inicial)+' Segundos')
-        time.sleep(15) # Espera para evitar bloqueos de IP 
+        t_avance = time.time()
+        print('Progreso: pagina ' + str(pag) + " ... " + str(t_avance-t_inicial)+' Segundos')
+        time.sleep(5) # Espera para evitar bloqueos de IP 
+
 ### Fin de la Iteración        
-        
-        
-### Segunda Iteración
-articulos = []
-for l in range(len(links)):
-    driver.get(base+links[l])
-    soup_texto = BeautifulSoup(driver.page_source, 'html.parser')
-    art = str(soup_texto.find('div', class_='Scroll').find_all('div', class_='texto'))
-    articulos.append(art) 
-    time.sleep(5)
-
-# driver.quit()
-
-print('.................. Done!')
-
-# abre conección a la base
-conn = sqlite3.connect('noticias_ene20-abr20.db')
-c = conn.cursor()
-# create_table()
-
-#### Agrega las cosas a la base
-insert_data()
+driver.quit()
+driver_art.quit()
 
 ### Cierra conección a la base
 c.close
 conn.close()
 
-
-
+print('.................. Done!')
 
