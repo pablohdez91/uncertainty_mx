@@ -6,11 +6,12 @@ El procedimiento consta de tres pasos. En el primero se hace Web Scraping de las
 Adicionalmente se crea un indicador diario, más sencillo, de incertidumbre económica por COVID-19.
 
 ## Web Scraping
-*WebScraping.py* realiza el Web Scraping de los artículos periodísticos de Grupo Reforma desde sus páginas de internet y genera el archivo Corpus.db (el cual no se puede incluír en este repositorio por su tamaño). Para poder ejecutar correctamente es necesario tener una membresía para dichos periodicos. 
+*WebScraping.py* realiza el Web Scraping de los artículos periodísticos de Grupo Reforma desde sus páginas de internet y genera el archivo *Corpus.db* (el cual no se puede incluír en este repositorio por su tamaño). Para poder ejecutar correctamente es necesario tener una membresía para dichos periodicos. 
+
 *WebScraping_today.py* Crea vectores mensuales que cuentan el total de artículos publicados que contienen la palabra "hoy", por periodico. Estos vectores se utilizan como *proxies* del total de artículos publicados por un periodico. Se utilizan para normalizar los conteos de arítulos por tópicos en el archivo *BuildIndices.R*
 
 ## Extracción de Tópicos
-*TopicExtraction.py* toma el texto en bruto de *Corpus.db*, lo procesa y modela para generar los conteos del archivo *RawCount.csv*
+*TopicExtraction.py* toma el texto en bruto de *Corpus.db*, lo procesa y modela para generar los conteos del archivo *RawCount.csv*.
 
 ## Construcción de los Índices
 *BuildIndices.R* toma *RawCount.csv* y los vectores hechos en *WebScrapping_today.py* para construir las series de tiempo del archivo *uncertainty_mx.csv* para las cuales también se presentan gráficas.
