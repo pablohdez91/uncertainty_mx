@@ -1,12 +1,18 @@
-# Modulos
+# Modules
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
 from math import ceil
 import sqlite3
 
+# Directory
+"""
+import os
+path = ""
+os.chdir(path)
+"""
 
-# Definicion de funciones SQLite
+# SQLite Functions
 periodico = 'Reforma'    # "Reforma", "Mural" o "Elnorte"
 def create_table():
     c.execute("CREATE TABLE IF NOT EXISTS {}(fecha TEXT, titulo TEXT, articulo TEXT)".format(periodico))
@@ -22,45 +28,31 @@ def insert_data():
         conn.commit()
 
 
-"""
-import os
-path = ""
-os.chdir(path)
-"""
-
-
-# parametros de búsqueda
+# Search Parameters
 busqueda = "economia incertidumbre"
 fecha_ini = '01-06-2020'
 fecha_fin = '30-06-2020'
-
-
-# Inicio
 url = 'https://busquedas.gruporeforma.com/{}/BusquedasComs.aspx'.format(periodico)
 base = 'https://busquedas.gruporeforma.com/{}/'.format(periodico)
-chrome = "C:\\Users\\Pablo\\chromedriver.exe"
-noticias = 'Corpus.db'
+Corpus = 'data/Corpus.db'
 
 
-# inicia navegacion ---------------------------------------------------------
-# Instertar Usuario y contraseña
+# Start Navigation
+# In driver_art it is necessary to insert username and password manually on the page
+# Chromedrive.exe must be in path
 driver_art = webdriver.Chrome()
-driver_art.get('https://{}.com'.format(periodico))
-
 driver = webdriver.Chrome()
+driver_art.get('https://{}.com'.format(periodico))
 driver.get(url)
 
-
-# Introduce parámetros de búsqueda:
+# Insert search parameters in the page
 driver.find_element_by_name('txtTextSearch').send_keys(busqueda)
 driver.find_element_by_name('txtFechaIni').send_keys(fecha_ini)
 driver.find_element_by_name('txtFechaFin').send_keys(fecha_fin)
 driver.find_element_by_id('rb_orden_2').click()
-
-#### Wait para que cargue la página
 time.sleep(5)
 
-#### Numero total de paginas
+# Get total number of pages for iteration
 soup = BeautifulSoup(driver.page_source, 'html.parser')
 P = soup.find('span', class_='totalRegistros').text
 P = P.replace(",", "")
@@ -68,35 +60,36 @@ P = int(P)
 P = ceil(P/20)  # 20 es el número de articulos por página
 del soup
 
-# Abre conección a la base
-conn = sqlite3.connect(noticias)
+# Connect with the SQL database
+conn = sqlite3.connect(Corpus)
 c = conn.cursor()
 create_table()
 
+# Iteration over pages
 t_inicial = time.time()
 pag = 1
 while pag <= P:
-    ### parsea la página
+    ### parse the page
     soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-    ### recoge fechas
+    ### scrapping dates
     soup_fechas = soup.find_all('p', class_='fecha')
     fechas = []
     for i in range(len(soup_fechas)):
         fechas.append(soup_fechas[i].text)
 
-    ### recoge titulos
+    ### scrapping titles
     soup_titulos = soup.find_all('a', class_='hoverC')
     titulos = []
     for i in range(len(soup_titulos)):
         titulos.append(soup_titulos[i].text)
 
-    ### recoge links a las notas
+    ### scrapping links
     links = []
     for i in range(len(soup_titulos)):
         links.append(soup_titulos[i]['href'])
 
-    ### recoge los artículos completos
+    ### scrapping articles
     articulos = []
     for l in range(len(links)):
         driver_art.get(base+links[l])
@@ -107,19 +100,18 @@ while pag <= P:
 
     insert_data()
 
-    #### Cambia la hoja
+    #### Change the page
     pag += 1
     if pag <= P:
         driver.find_element_by_id('a_pagina_' + str(pag)).click()
         t_avance = time.time()
-        print('Progreso: pagina ' + str(pag) + " ... " + str(t_avance-t_inicial)+' Segundos')
-        time.sleep(5) # Espera para evitar bloqueos de IP
+        print('Progress: page ' + str(pag) + " ... " + str(t_avance-t_inicial)+' Seconds')
+        time.sleep(5) # Wait for avoid IP blocks
 
-### Fin de la Iteración
+### Close drivers and database connection
 driver.quit()
 driver_art.quit()
 
-### Cierra conección a la base
 c.close
 conn.close()
 

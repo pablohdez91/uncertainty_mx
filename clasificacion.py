@@ -1,14 +1,10 @@
-"""
-desde las noticias en bruto hasta la generaci�n de conteos raw
-"""
-
-# Modulos
+# Modules
 import pandas as pd
 import sqlite3
 import spacy
 nlp = spacy.load('es_core_news_sm')
 
-
+# Directory
 """
 import os
 path = ""
@@ -16,29 +12,28 @@ os.chdir(path)
 """
 
 
-# Construcción del Data Frame inicial -----------------------------------------
-# Importar tablas
+# Build Initial Data Frame -----------------------------------------------------
+## Import Tables
 con = sqlite3.connect('data/Corpus.db')
 reforma = pd.read_sql_query("SELECT * from Reforma", con)
 mural = pd.read_sql_query("SELECT * from Mural", con)
 elnorte = pd.read_sql_query("SELECT * from Elnorte", con)
 con.close()
 
-# variable de periodico
+## Create 'periodico' variable
 reforma['periodico'] = "reforma"
 mural['periodico'] = "mural"
 elnorte['periodico'] = "elnorte"
 
-# dataframe completo
+## Append data frames
 data = pd.concat([reforma, mural, elnorte])
 
 
-
-#Limpieza del Corpus-----------------------------------------------------------
-## quitar articulos vacios
+# Pre-Processing ---------------------------------------------------------------
+## Quit Empty articles
 data = data.drop(data[data['articulo']==""].index)
 
-## Primera limipieza (quita restos de html)
+## First clean (delete html code)
 limp = ['[', ']', '<div class="texto" id="divTexto">', '</div>', '<p>', '</p>',
         '<span class="highlighter">', '</span>', '\r', '\n', '<br/>',
         '<tbody>', '</tbody>', '<td>', '</td>', '<tr>', '</tr>',
@@ -47,54 +42,54 @@ limp = ['[', ']', '<div class="texto" id="divTexto">', '</div>', '<p>', '</p>',
 for i in range(len(limp)):
     data['articulo'] = data['articulo'].str.replace(limp[i], '')
 
-# Sacamos los textos para facilitar el código
+## Pre-Processing
 docs = []
 
-for doc in data['articulo']:   # Esto es para usar spacy (tarda), tokeniza
+for doc in data['articulo']:   # Tonenization (slow)
     docs.append(nlp(doc))
 
-## lemmatiza, quita puntuacion, numeros y stopwords
+## lemmatization, delete punctuation, numbers and stopwords
 docs = [[w.lemma_
           for w in doc
               if not w.is_stop
               and not w.is_punct
               and not w.like_num] for doc in docs]
 
-# Quita palabras muy cortas
+## Delete short words
 docs = [[token for token in doc if len(token) > 2] for doc in docs]
 
-# Pasa a minúsculas
+## to lowercase
 docs = [[token.lower() for token in doc] for doc in docs]
 
-# Busca bigramas
+## Search for bigrams
 import gensim
 bigram = gensim.models.Phrases(docs)
 docs = [bigram[doc] for doc in docs]
 
 
-# Vectorización (bag-of-words) -----------------------------------------------
+# Vectorization (bag-of-words) -------------------------------------------------
 from gensim.corpora import Dictionary
 dictionary = Dictionary(docs)
 
-# filtra palabras que aparecen en menos de 20 docs o en más del 50%
+## Filter words that appear in less than 20 docs or more than 50%
 dictionary.filter_extremes(no_below=20, no_above=0.5)
 
-# bow: Bag of Words
+## BOW: Bag of Words
 corpus = [dictionary.doc2bow(doc) for doc in docs]
 
 print('Number of unique tokens: %d' % len(dictionary))
 print('Number of documents: %d' % len(corpus))
 
 
-# Clasificación --------------------------------------------------------------
-# Entrenamiento del modelo LDA (con GENSIM)
+# Classification with LDA ------------------------------------------------------
+## Training the model
 from gensim.models import LdaModel
-# Parametros de entrenamiento
+## Training parameters
 num_topics = 10
 chunksize = 2000
 passes = 20
 iterations = 400
-eval_every = None  # Perplejidad del modelo. (tarda mucho si se activa)
+eval_every = None  # Perplexity of the model. (takes a long time if activated)
 # Make a index to word dictionary.
 temp = dictionary[0]  # This is only to "load" the dictionary.
 id2word = dictionary.id2token
@@ -112,24 +107,26 @@ model = LdaModel(
 )
 
 
-# Post Modelación ------------------------------------------------------------
-doc_topics=[]   # listas de tópicos con sus respectivas probas por documento
+# Post Modelling ------------------------------------------------------------
+doc_topics=[]
 for i in range(len(corpus)):
     doc_topics.append(model.get_document_topics(corpus[i]))
 
-import operator   # para ordenar las tuplas por probabilidad
+## To order the tuples by probability
+import operator
 for tup in doc_topics:   # Solamente se toma el tópico con más probabilidad
     tup.sort(key = operator.itemgetter(1), reverse = True)
 
-lis_topics = []   # Vector de tópicos por documento (para pegar en el DF)
+## Vector of topics for each document (to paste in the data frame)
+lis_topics = []
 for t in range(len(doc_topics)):
     lis_topics.append(doc_topics[t][0][0])
 
-# Palabras clave de cada tópico
+## Characteristic words for each topic
 topicos = model.show_topics()
 print(topicos)
 
-# pegado a la base original
+## Paste to the initial data frame
 df = data
 df['topico'] = lis_topics
 del df['articulo']
