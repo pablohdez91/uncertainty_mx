@@ -18,3 +18,6 @@ Adicionalmente se crea un indicador diario, más sencillo, de incertidumbre econ
 
 ## Incertidumbre Diaria por COVID-19
 Este indicador es únicamente un conteo de artículos en los que aparecen las palabras clave: "economía", "incertidumbre" y "coronavirus", normalizado por el total de articulos en los que aparece la palabra "hoy". El Web Scraping se hacen en el archivo *WebScraping_covid.py*, los indicadores y la grafica se construyen en el archivo *covid_daily/covid.R*.
+
+
+$$ \int_{-\inf}^{\inf} f_{X}(x) dx = 1 $$
