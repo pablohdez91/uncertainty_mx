@@ -1,0 +1,49 @@
+This is BibTeX, Version 0.99d (TeX Live 2022/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: uncertainty_mx.aux
+The style file: apalike.bst
+Database file #1: referencias.bib
+Warning--empty institution in ahir_2018
+Warning--can't use both author and editor fields in ferrara_2018
+You've used 22 entries,
+            1935 wiz_defined-function locations,
+            612 strings with 7207 characters,
+and the built_in function-call counts, 8355 in all, are:
+= -- 808
+> -- 335
+< -- 14
++ -- 112
+- -- 110
+* -- 735
+:= -- 1490
+add.period$ -- 66
+call.type$ -- 22
+change.case$ -- 164
+chr.to.int$ -- 22
+cite$ -- 24
+duplicate$ -- 305
+empty$ -- 582
+format.name$ -- 136
+if$ -- 1620
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 18
+newline$ -- 113
+num.names$ -- 66
+pop$ -- 129
+preamble$ -- 1
+purify$ -- 165
+quote$ -- 0
+skip$ -- 226
+stack$ -- 0
+substring$ -- 573
+swap$ -- 31
+text.length$ -- 6
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 128
+warning$ -- 2
+while$ -- 63
+width$ -- 0
+write$ -- 288
+(There were 2 warnings)

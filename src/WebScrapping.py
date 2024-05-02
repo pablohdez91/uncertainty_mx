@@ -1,5 +1,6 @@
 # Modules
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 import time
 from math import ceil
@@ -40,16 +41,16 @@ Corpus = 'data/Corpus.db'
 # Start Navigation
 # In driver_art it is necessary to insert username and password manually on the page
 # Chromedrive.exe must be in path
-driver_art = webdriver.Chrome()
+# driver_art = webdriver.Chrome()
 driver = webdriver.Chrome()
-driver_art.get('https://{}.com'.format(periodico))
+# driver_art.get('https://{}.com'.format(periodico))
 driver.get(url)
 
 # Insert search parameters in the page
-driver.find_element_by_name('txtTextSearch').send_keys(busqueda)
-driver.find_element_by_name('txtFechaIni').send_keys(fecha_ini)
-driver.find_element_by_name('txtFechaFin').send_keys(fecha_fin)
-driver.find_element_by_id('rb_orden_2').click()
+driver.find_element(By.ID, 'txtTextSearch').send_keys('economia incertidumbre')
+driver.find_element(By.NAME, 'txtFechaIni').send_keys(fecha_ini)
+driver.find_element(By.NAME, 'txtFechaFin').send_keys(fecha_fin)
+driver.find_element(By.ID, 'rb_orden_2').click()
 time.sleep(5)
 
 # Get total number of pages for iteration

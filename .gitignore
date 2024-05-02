@@ -1,6 +1,7 @@
 ### Python ###
 .pdf
 .xlsx
+.ods
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -174,3 +175,6 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python
+
+sqlite3
+time

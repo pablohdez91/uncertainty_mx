@@ -4,6 +4,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{titling}
+\usepackage{natbib}
 
 \title{Medición de la Incertidumbre Económica en México: Una Aproximación Basada en Análisis de Texto}
 \date{Abril 2024}
@@ -29,13 +30,27 @@ También, se encuentra que la incertidumbre por política fiscal tiene efectos c
 ¿Cómo se hace?
 
 \section{Revisión de la Literatura}
-¿Qué se ha hecho en cuanto a medición de la incertidumbre? ¿Cómo se mide la incertidumbre normalmente? \\
-¿Qué investigaciones similares se han hecho en otros países?
-¿Qué investigaciones similares se han hecho en México? \\
+A nivel teórico, existe una distinción entre los conceptos de riesgo e incertidumbre. Enfrentamos riesgo cuando no sabemos el resultado de cierto fenómeno aleatorio, pero conocemos la probabilidad con la que ocurrirán los eventos, o al menos tenermo una idea convincente. Por otro lado la incertidumbre es la falta de habilidad de los agentes económicos, no solo para saber lo que va a pasar, sino para asignar probabilidades a los posibles eventos \citep{knight_1921}. A pesar de que esta diferencia pueda tener implicaciones teóricas interesantes, en la práctica es demasiado sutil como para observarse en los datos. Por lo tanto, siguiendo la literatura reciente sobre la medición de la incertidumbre, no haremos una diferenciación entre ambos conceptos \citep{bloom2014}. Pensamos en la incertidumbre como la incapacidad de los agentes económicos para pronósticar eventos futuros. Bajo esta definición tan general y a raíz de la gran recesión, se han desarrollado distintas aproximaciones para medir la incertidumbre, cada una de ellas pensada para un contexto diferente. Algunas de estas aproximaciones se basan en: incertidumbre en mercados financieros, mediciones a nivel microeconómico, errores de pronóstico macroeconómico, desacuerdo entre agentes económicos relevantes encuestados y análisis de texto \citep{ferrara_2018}. \\
+
+Las aproximaciones más comunes son aquellas que se basan en variables financieras. En esta categoría, la variable más utilizada es el VIX, junto con el VXO \citep{bloom_2009}. También se utilizan estimaciones econométricas de varianza condicional \citep{ferrara_2014} y volatilidad estocástica \citep{carriero_2016}. A nivel micro, algunos autores han propuesto mediciones basadas en desviaciones estándar, ya sea de retornos a nivel empresa \citep{bloom_2007, gilchrist_2013} o de residuales de estimaciones de la Productividad Total de los Factores \citep{bloom_2009}. A grandes rasgos, lo que caracteriza a estos primeros dos tipos de mediciones, es que se basan en estimaciones de segundos momentos. Es decir, son medidas de dispersión. \\
+
+Se han desarrollado también aproximaciones basadas en errores de pronóstico de variables macroeconómicas \citep{scotti_2016, jurado_2015}, las cuales son conceptualmente distintas a las anteriores. Siguiendo esta misma idea, algunos otros autores han propuesto alternativas que se basan en la medición del nivel de desacuerdo entre pronosticadores encuestados. \citep{bachmann_2013, lahiri_2010}.  \\
+
+Finalmente, en los últimos años se ha desarrollado toda una corriente en la literatura, de trabajos que buscan aproximar la incertidumbre a partir del análisis de texto de noticias. El trabajo seminal es el de \cite{baker_2016}, quienes se principalmente por la incertidumbre respecto a la política económica, para lo cual crean el índice EPU (Economic Policy Uncertainty). Este índice es un conteo normalizado de artículos periodísticos que contienen palabras clave relacionadas con los conceptos de economía, política e incertidumbre. Utilizando esta misma metodología, han construido índices para un total de 24 países, entre ellos México. \\
+
+Una de las principales virtudes de esta aproximación, es su flexibilidad. En el mismo trabajo de \cite{baker_2016}, construyen, solo para EEUU, índices específicos para 11 categorías diferentes de incertidumbre política, utilizando métodos de clasificación supervisados. Bajo esta misma lógica, otros autores han construido índices más especializados. Por ejemplo, \cite{husted_2016} construyen un índice diario de incertidumbre específico para política monetaria. Otra extensión que se ha desarrollado es la construcción de indicadores de incertidumbre global \citep{davis_2016, caldara_2016, ahir_2018}. \\
+
+Finalmente, cada vez son más los trabajos que construyen indicadores similares para diferentes países, con las virtudes de ser más especializados, contener más información o desarrollar mejoras metodológicas. Por ejemplo, \cite{azqueta_2020} construyen indicadores para cuatro países de la Unión Europea; \cite{arbatli_2017} para Japón; \cite{ferreira_2019} para Brásil y \cite{ghirelli_2019} para España. \\
+
+
 ¿Cuáles son las causas y los efectos que tiene la incertidumbre?
 
 \section{Construcción de los Índices de Incertidumbre Económica}
 
 \section{Análisis de la Inceridumbre Económica}
+
+
+\bibliographystyle{apalike}
+\bibliography{referencias.bib}
 
 \end{document}
