@@ -103,7 +103,7 @@ coll = db.Corpus
 periodico = 'reforma' # reforma, elnorte, mural
 busqueda = "economia incertidumbre"
 fecha_ini = '01-01-1993'
-fecha_fin = '31-12-1993'
+fecha_fin = '31-12-2023'
 url = 'https://busquedas.gruporeforma.com/{}/BusquedasComs.aspx'.format(periodico)
 base = 'https://busquedas.gruporeforma.com/{}/'.format(periodico)
 
